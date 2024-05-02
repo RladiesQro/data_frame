@@ -1,0 +1,315 @@
+---
+title: "Rladies_Qro_Marzo"
+author: "Karen Nuñez"
+date: "2024-03-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data frames
+
+```{r}
+color <- c("mixto", "negro", "atigrado")
+peso <- c(2.1, 5.0, 3.2)
+le_gusta_la_cuerda <- c(1, 0, 1)
+
+gatos <- data.frame(color,
+          peso,
+          le_gusta_la_cuerda)
+
+#Agregar nueva columna
+#vector con mismo número de entradas que el número de filas en el marco de datos
+
+edad <- c(2,3,5)
+cbind(gatos, edad)
+
+gatos <- cbind(gatos, edad)
+
+#Agregar una fila
+#as filas de un data frame están compuestas por listas
+nueva_fila <- list("carey", 3.3, TRUE, 9)
+gatos <- rbind(gatos, nueva_fila)
+
+gatos
+
+gatos$color
+
+str(gatos$color)
+
+gatos$color <- as.character(gatos$color)
+str(gatos)
+
+
+```
+### Quitando filas
+
+```{r}
+#Quitando filas
+#-4 significa que queremos remover la cuarta fila, la coma sin nada detrás indica que se aplica a todas las columnas.
+
+gatos[-4,]
+
+ 
+
+#Remover 2 filas en un llamado usando ambos números dentro de un vector
+
+gatos[c(-4,-5),]
+
+#eliminar filas que contengan valores NA
+na.omit(gatos)
+
+gatos <- na.omit(gatos)
+
+
+```
+### Eliminando columnas
+
+Eliminar columnas en un data frame. Hay dos formas de eliminar una columna: por número o nombre de índice.
+
+```{r}
+gatos[,-4]
+
+drop <- names(gatos) %in% c("edad")
+gatos[,!drop]
+
+```
+
+### Añadiendo filas o columnas a un data frame
+La clave que hay que recordar al añadir datos a un data frame es que las columnas son vectores o factores, mientras que las filas son listas. 
+Podemos pegar dos data frames usando rbind que significa unir las filas (verticalmente):
+```{r}
+gatos <- rbind(gatos, gatos)
+gatos
+
+#Renombrar los rownames
+rownames(gatos) <- NULL
+gatos
+```
+
+
+```{r}
+#llamar data frame
+iris
+class(iris)
+
+#número de filas
+nrow(iris)
+
+#número de columnas
+ncol(iris)
+
+#obtener ambos datos
+dim(iris)
+
+#nombres de las columnas
+colnames(iris)
+
+#echemos un vistazo
+head(iris)
+
+```
+
+##Haciendo subconjuntos de datos
+
+Empecemos con el caballito de batalla de R: un vector numérico.
+
+En R, un vector puede contener palabras, números o valores lógicos. Estos son llamados vectores atómicos ya que no se pueden simplificar más.
+
+```{r}
+x <- c(5.4, 6.2, 7.1, 4.8, 7.5)
+names(x) <- c('a', 'b', 'c', 'd', 'e')
+x
+
+#Uso de indices
+x[1]
+
+#Pedir varios elementos al mismo tiempo
+x[c(1, 3)]
+
+#Tomar un rango del vector
+x[1:4]
+
+#PEdir el elemento varias veces
+x[c(1,1,3)]
+
+#Si pedimos por índices mayores a la longitud del vector, R regresará un valor faltante
+x[6]
+
+```
+
+### Saltando y quitando elementos
+
+```{r}
+#Si usamos un valor negativo como índice para un vector, R regresará cada elemento excepto lo que se ha especificado:
+
+x[-2]
+
+#Podemos no mostrar varios elementos
+x[c(-1, -5)]
+
+x[-c(1,5)]
+
+x[-(1:3)]
+
+#Para quitar los elementos de un vector, será necesario que asignes el resultado de vuelta a la variable:
+x <- x[-4]
+x
+
+```
+
+### Haciendo subconjuntos por nombre
+Podemos extraer elementos usando sus nombres, en lugar de extraerlos por índice:
+
+```{r}
+x <- c(a=5.4, b=6.2, c=7.1, d=4.8, e=7.5) # podemos nombrar un vector en la misma línea
+
+x
+
+x[c("a", "c")]
+
+```
+### Creando subconjuntos usando operaciones lógicas
+También podemos usar un vector con elementos lógicos para hacer subconjuntos:
+```{r}
+x[c(FALSE, FALSE, TRUE, FALSE, TRUE)]
+
+x[x > 7]
+
+# usar == para imitar el método anterior de indexar con nombre
+x[names(x) == "a"]
+
+
+```
+
+### Saltarse los elementos nombrados
+Si tratamos de omitir un elemento con nombre al negar la cadena, R se queja de que no sabe cómo tomar el valor negativo de una cadena:
+```{r}
+x <- c(a=5.4, b=6.2, c=7.1, d=4.8, e=7.5) # comenzamos nuevamente nombrando un vector en la misma línea
+x[-"a"]
+
+
+#usar el operador != (no igual) para construir un vector con elementos lógicos
+x[names(x) != "a"]
+
+
+#Supongamos que queremos excluir los elementos "a" y "c", entonces intentamos lo siguiente:
+x[names(x)!=c("a","c")]
+
+names(x) != c("a", "c")
+
+x[! names(x) %in% c("a","c") ]
+
+```
+
+### Haciendo subconjuntos de factores
+
+Podemos hacer subconjuntos de factores de la misma manera que con los vectores.
+
+```{r}
+f <- factor(c("a", "a", "b", "c", "c", "d"))
+f[f == "a"]
+
+f[f %in% c("b", "c")]
+
+f[1:3]
+
+#Saltar elementos no quita el nivel
+f[-3]
+```
+
+### Haciendo subconjuntos de matrices
+También podemos hacer subconjuntos de matrices usando la función [ En este caso toma dos argumentos: el primero se aplica a las filas y el segundo a las columnas:
+
+```{r}
+set.seed(1)
+m <- matrix(rnorm(6*4), ncol=4, nrow=6)
+m[3:4, c(3,1)]
+
+#Siempre puedes dejar el primer o segundo argumento vacío para obtener todas las filas o columnas respectivamente:
+m[, c(3,4)]
+
+#Si accedemos a una fila o una columna, R automáticamente convertirá el resultado a un vector:
+m[3,]
+
+#Si quieres mantener la salida como una matriz, necesitas especificar un tercer argumento; drop = FALSE:
+m[3, , drop=FALSE]
+
+#Como las matrices son vectores, podemos también hacer subconjuntos usando solo un argumento:
+m[5]
+
+#Los elementos del vector están acomodados por columnas:
+matrix(1:6, nrow=2, ncol=3)
+
+# Llenar una matriz por filas, usamos byrow=TRUE:
+matrix(1:6, nrow=2, ncol=3, byrow=TRUE)
+
+
+```
+
+### Haciendo subconjuntos de listas
+
+Si quieres un subconjunto de una lista, pero no quieres extraer un elemento, entonces probablemente usarás [.
+
+```{r}
+xlist <- list(a = "RLadies", b = 1:10, data = head(mtcars))
+xlist[1]
+
+#subconjuntos de elementos de la lista de la misma manera que con los vectores atómicos usando [
+xlist[1:2]
+
+#extraer elementos individuales de la lista, tendrás que hacer uso de la función doble corchete: [[
+xlist[[1]]
+
+#No puedes extraer más de un elemento al mismo tiempo:
+xlist[[1:2]]
+
+#puedes usar los nombres para hacer subconjuntos y extraer elementos:
+xlist[["a"]]
+
+
+#La función $ es una manera abreviada para extraer elementos por nombre:
+xlist$data
+
+```
+
+### Data frames
+Las data frames son listas, por lo que aplican reglas similares. Sin embargo estos también son objetos de dos dimensiones:
+```{r}
+head(iris[3])
+
+head(iris[["Petal.Length"]])
+
+iris[1:3,]
+
+iris[3,]
+
+```
+
+##Violin plot
+
+```{r}
+#Cargando la libreria
+#install.packages("vioplot")
+#library("vioplot")
+
+#boxplot
+boxplot(iris$Sepal.Length[iris$Species=="setosa"], iris$Sepal.Length[iris$Species=="versicolor"], iris$Sepal.Length[iris$Species=="virginica"], names=c("setosa", "versicolor", "virginica"))
+
+#violin plot
+vioplot(iris$Sepal.Length[iris$Species=="setosa"], iris$Sepal.Length[iris$Species=="versicolor"], iris$Sepal.Length[iris$Species=="virginica"], names=c("setosa", "versicolor", "virginica"))
+
+```
+
+```{r}
+vioplot(iris$Sepal.Length[iris$Species=="setosa"], iris$Sepal.Length[iris$Species=="versicolor"], iris$Sepal.Length[iris$Species=="virginica"], names=c("setosa", "versicolor", "virginica"), main = "Sepal Length", col="lightblue")
+```
+#Vectorización
+```{r}
+vioplot(iris$Sepal.Length[iris$Species=="setosa"], iris$Sepal.Length[iris$Species=="versicolor"], iris$Sepal.Length[iris$Species=="virginica"], names=c("setosa", "versicolor", "virginica"), 
+main = "Sepal Length", col=c("lightgreen", "lightblue", "palevioletred"))
+legend("topleft", legend=c("setosa", "versicolor", "virginica"), fill=c("lightgreen", "lightblue", "palevioletred"), cex = 0.5)
+```
+
